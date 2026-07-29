@@ -22,6 +22,13 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    protected $fillable = ['username', 'password', 'role'];
+
+    public function pegawai()
+    {
+        return $this->hasOne(Pegawai::class);
+    }
+    
     protected function casts(): array
     {
         return [
