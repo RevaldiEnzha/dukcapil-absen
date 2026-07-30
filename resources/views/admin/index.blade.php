@@ -94,18 +94,22 @@
                             <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-surface-variant text-on-surface-variant text-xs font-bold border border-outline-variant">{{ ucfirst($pegawai->status) }}</span>
                         @endif
                     </td>
+                    <!-- Kolom Aksi (DIPERBAIKI UNTUK JS) -->
                     <td class="py-4 px-6 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <a href="#" class="inline-flex items-center gap-1 px-3 py-1.5 bg-secondary-container/50 text-secondary hover:bg-secondary-container rounded text-xs font-bold transition-colors">
+                            <!-- Tombol Edit (Kirim data via JS) -->
+                            <button type="button" 
+                                    onclick="openEditModal('{{ $pegawai->id }}', '{{ $pegawai->nik }}', '{{ $pegawai->nama }}', '{{ $pegawai->jenis_kelamin }}', '{{ $pegawai->no_hp }}', '{{ $pegawai->alamat }}', '{{ $pegawai->status }}')" 
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-secondary-container/50 text-secondary hover:bg-secondary-container rounded text-xs font-bold transition-colors">
                                 <span class="material-symbols-outlined text-[16px]">edit</span>Edit
-                            </a>
-                            <form action="{{ route('admin.pegawai.destroy', $pegawai->id) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-error-container text-on-error-container hover:bg-red-200 rounded text-xs font-bold transition-colors">
-                                    <span class="material-symbols-outlined text-[16px]">delete</span>Hapus
-                                </button>
-                            </form>
+                            </button>
+                            
+                            <!-- Tombol Hapus (Kirim data via JS) -->
+                            <button type="button" 
+                                    onclick="openDeleteModal('{{ $pegawai->id }}', '{{ $pegawai->nama }}')" 
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-error-container text-on-error-container hover:bg-red-200 rounded text-xs font-bold transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">delete</span>Hapus
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -228,4 +232,143 @@
         </div>
     </div>
 </div>
+<!-- ================= MODAL EDIT PEGAWAI ================= -->
+<div class="fixed inset-0 z-[100] hidden" id="modal-edit-pegawai">
+    <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm transition-opacity" onclick="document.getElementById('modal-edit-pegawai').classList.add('hidden')"></div>
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4 pointer-events-none">
+        <div class="bg-surface-container-lowest rounded-xl w-full max-w-lg shadow-xl pointer-events-auto flex flex-col max-h-[90vh] overflow-hidden">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface">
+                <h3 class="text-lg text-on-surface font-bold">Edit Data Pegawai</h3>
+                <button type="button" class="text-on-surface-variant hover:bg-surface-container-highest transition-colors rounded-full p-1" onclick="document.getElementById('modal-edit-pegawai').classList.add('hidden')">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 bg-surface-container-lowest">
+                <form id="form-edit-pegawai" method="POST" class="flex flex-col gap-5">
+                    @csrf
+                    @method('PUT') <!-- Wajib untuk edit data di Laravel -->
+                    
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-bold text-sm text-on-surface">NIK <span class="text-error">*</span></label>
+                        <input name="nik" id="edit_nik" type="text" required maxlength="16" minlength="16" class="w-full px-4 py-2 bg-surface border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg outline-none text-sm transition-shadow">
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-bold text-sm text-on-surface">Nama Lengkap <span class="text-error">*</span></label>
+                        <input name="nama" id="edit_nama" type="text" required class="w-full px-4 py-2 bg-surface border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg outline-none text-sm transition-shadow">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="flex flex-col gap-1.5">
+                            <label class="font-bold text-sm text-on-surface">Jenis Kelamin <span class="text-error">*</span></label>
+                            <div class="relative">
+                                <select name="jenis_kelamin" id="edit_jenis_kelamin" required class="w-full px-4 py-2 bg-surface border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg outline-none text-sm appearance-none cursor-pointer">
+                                    <option value="L">Laki-laki</option>
+                                    <option value="P">Perempuan</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[20px]">expand_more</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <label class="font-bold text-sm text-on-surface">No. HP</label>
+                            <input name="no_hp" id="edit_no_hp" type="tel" class="w-full px-4 py-2 bg-surface border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg outline-none text-sm transition-shadow">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label class="font-bold text-sm text-on-surface">Alamat</label>
+                        <textarea name="alamat" id="edit_alamat" rows="3" class="w-full px-4 py-2 bg-surface border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg outline-none text-sm transition-shadow"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="flex flex-col gap-1.5">
+                            <label class="font-bold text-sm text-on-surface">Status <span class="text-error">*</span></label>
+                            <div class="relative">
+                                <select name="status" id="edit_status" required class="w-full px-4 py-2 bg-surface border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg outline-none text-sm appearance-none cursor-pointer">
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Tidak Aktif">Tidak Aktif</option>
+                                    <option value="Cuti">Cuti</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[20px]">expand_more</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <label class="font-bold text-sm text-on-surface">Password Akun</label>
+                            <input name="password" type="text" placeholder="Kosongkan jika tidak diubah" minlength="6" class="w-full px-4 py-2 bg-surface border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg outline-none text-sm transition-shadow">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 mt-4 border-t border-outline-variant pt-5">
+                        <button type="button" class="px-5 py-2.5 rounded-lg border border-outline text-primary font-bold text-sm hover:bg-surface-container-highest transition-colors" onclick="document.getElementById('modal-edit-pegawai').classList.add('hidden')">Batal</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-lg bg-primary text-white font-bold text-sm hover:bg-primary-container shadow-sm transition-all">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL KONFIRMASI HAPUS ================= -->
+<div class="fixed inset-0 z-[100] hidden" id="modal-delete-pegawai">
+    <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm transition-opacity" onclick="document.getElementById('modal-delete-pegawai').classList.add('hidden')"></div>
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4 pointer-events-none">
+        <div class="bg-surface-container-lowest rounded-xl w-full max-w-sm shadow-xl pointer-events-auto flex flex-col overflow-hidden text-center p-6">
+            
+            <!-- Ikon Peringatan -->
+            <div class="w-16 h-16 bg-error-container text-on-error-container rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-[32px]">warning</span>
+            </div>
+            
+            <h3 class="text-xl font-bold text-on-surface mb-2">Hapus Pegawai?</h3>
+            <p class="text-on-surface-variant text-sm mb-6">Anda yakin ingin menghapus data <strong id="delete-nama-pegawai" class="text-[#ba1a1a]"></strong>? Tindakan ini tidak dapat dibatalkan.</p>
+            
+            <!-- Form Delete dengan Pencegah Klik Ganda (onsubmit) -->
+            <form id="form-delete-pegawai" method="POST" class="flex justify-center gap-3 w-full" onsubmit="document.getElementById('btn-hapus-konfirm').disabled = true; document.getElementById('btn-hapus-konfirm').innerText = 'Menghapus...';">
+                @csrf
+                @method('DELETE')
+                
+                <button type="button" class="flex-1 py-2.5 rounded-lg border border-outline text-on-surface-variant font-bold text-sm hover:bg-surface-container-highest transition-colors" onclick="document.getElementById('modal-delete-pegawai').classList.add('hidden')">
+                    Batal
+                </button>
+                
+                <!-- PERBAIKAN: Warna tombol eksplisit jadi Merah, dan diberi ID -->
+                <button type="submit" id="btn-hapus-konfirm" class="flex-1 py-2.5 rounded-lg bg-[#ba1a1a] text-white font-bold text-sm hover:bg-[#93000a] shadow-sm transition-all disabled:opacity-50 disabled:cursor-wait">
+                    Ya, Hapus
+                </button>
+            </form>
+
+        </div>
+    </div>
+</div>
 @endsection
+
+<script>
+    // Fungsi melempar data dari tabel ke Modal Edit
+    function openEditModal(id, nik, nama, jk, hp, alamat, status) {
+        document.getElementById('form-edit-pegawai').action = `/admin/pegawai/${id}`;
+        document.getElementById('edit_nik').value = nik;
+        document.getElementById('edit_nama').value = nama;
+        document.getElementById('edit_jenis_kelamin').value = jk;
+        document.getElementById('edit_no_hp').value = hp || '';
+        document.getElementById('edit_alamat').value = alamat || '';
+        
+        // Memilih dropdown status secara spesifik karena case-sensitive
+        let statusSelect = document.getElementById('edit_status');
+        for (let i = 0; i < statusSelect.options.length; i++) {
+            if (statusSelect.options[i].value.toLowerCase() === status.toLowerCase()) {
+                statusSelect.selectedIndex = i;
+                break;
+            }
+        }
+        
+        document.getElementById('modal-edit-pegawai').classList.remove('hidden');
+    }
+
+    // Fungsi melempar data dari tabel ke Modal Hapus
+    function openDeleteModal(id, nama) {
+        document.getElementById('form-delete-pegawai').action = `/admin/pegawai/${id}`;
+        document.getElementById('delete-nama-pegawai').innerText = nama;
+        document.getElementById('modal-delete-pegawai').classList.remove('hidden');
+    }
+</script>
