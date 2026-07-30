@@ -33,7 +33,24 @@
                 <span class="material-symbols-outlined" {!! request()->routeIs('admin.pegawai.*') ? 'style="font-variation-settings: \'FILL\' 1;"' : '' !!}>group</span>
                 <span>Pegawai</span>
             </a>
-            <!-- Tambahkan menu lain sesuai kebutuhan -->
+            
+            <!-- Sidebar Menu: Absensi -->
+            <a class="{{ request()->routeIs('admin.absensi.*') ? 'bg-secondary-container text-on-secondary-container font-label-bold' : 'text-on-surface-variant hover:bg-surface-container-highest' }} rounded-full mx-3 px-4 py-3 flex items-center gap-4 transition-colors" href="{{ route('admin.absensi.index') }}">
+                <span class="material-symbols-outlined" {!! request()->routeIs('admin.absensi.*') ? 'style="font-variation-settings: \'FILL\' 1;"' : '' !!}>fact_check</span>
+                <span>Absensi</span>
+            </a>
+
+            <!-- Sidebar Menu: Izin -->
+            <a class="{{ request()->routeIs('admin.izin.*') ? 'bg-secondary-container text-on-secondary-container font-label-bold' : 'text-on-surface-variant hover:bg-surface-container-highest' }} rounded-full mx-3 px-4 py-3 flex items-center gap-4 transition-colors" href="{{ route('admin.izin.index') }}">
+                <span class="material-symbols-outlined" {!! request()->routeIs('admin.izin.*') ? 'style="font-variation-settings: \'FILL\' 1;"' : '' !!}>event_busy</span>
+                <span>Izin</span>
+            </a>
+
+            <!-- Sidebar Menu: Laporan -->
+            <a class="{{ request()->routeIs('admin.laporan.*') ? 'bg-secondary-container text-on-secondary-container font-label-bold' : 'text-on-surface-variant hover:bg-surface-container-highest' }} rounded-full mx-3 px-4 py-3 flex items-center gap-4 transition-colors" href="{{ route('admin.laporan.index') }}">
+                <span class="material-symbols-outlined" {!! request()->routeIs('admin.laporan.*') ? 'style="font-variation-settings: \'FILL\' 1;"' : '' !!}>assessment</span>
+                <span>Laporan</span>
+            </a>
         </div>
     </aside>
 
