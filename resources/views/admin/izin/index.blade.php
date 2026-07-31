@@ -154,19 +154,17 @@
 
             </div>
 
-            <!-- Tombol Aksi (Dummy) -->
-            <div class="px-6 py-4 border-t border-outline-variant bg-surface flex justify-end gap-3" id="area-tombol-aksi">
-                <!-- Form Tolak -->
+            <!-- Area Tombol Aksi (Hanya muncul jika status Menunggu) -->
+            <div class="px-6 py-4 border-t border-outline-variant bg-surface flex justify-end gap-3 hidden" id="area-tombol-aksi">
                 <form id="form-tolak" method="POST">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="status" value="ditolak">
-                    <button type="submit" class="px-5 py-2 rounded-lg border border-error text-error font-bold text-sm hover:bg-error/10 transition-colors">
+                    <button type="submit" class="px-5 py-2 rounded-lg bg-[#ba1a1a] text-white font-bold text-sm hover:bg-[#93000a] shadow-sm transition-all">
                         Tolak
                     </button>
                 </form>
 
-                <!-- Form Setuju -->
                 <form id="form-setuju" method="POST">
                     @csrf
                     @method('PUT')
@@ -176,7 +174,40 @@
                     </button>
                 </form>
             </div>
+
+            <!-- Area Status Terproses (Hanya muncul jika sudah Disetujui/Ditolak) -->
+            <div class="px-6 py-4 border-t border-outline-variant bg-surface flex justify-between items-center hidden" id="area-status-terproses">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-on-surface-variant">Keputusan:</span>
+                    <span id="badge-status-saat-ini" class="px-3 py-1 rounded-full text-xs font-bold"></span>
+                </div>
+                <button type="button" onclick="bukaModalBatal()" class="px-4 py-2 border border-outline-variant text-on-surface-variant rounded-lg font-bold text-sm hover:bg-surface-container-highest transition-colors">
+                    Batalkan Keputusan
+                </button>
+            </div>
             
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL KONFIRMASI BATAL KEPUTUSAN ================= -->
+<div class="fixed inset-0 z-[110] hidden" id="modal-batal-izin">
+    <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm transition-opacity" onclick="tutupModalBatal()"></div>
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4 pointer-events-none">
+        <div class="bg-surface-container-lowest rounded-xl w-full max-w-sm shadow-xl pointer-events-auto flex flex-col overflow-hidden text-center p-6">
+            <div class="w-16 h-16 bg-error-container text-on-error-container rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-[32px]">warning</span>
+            </div>
+            <h3 class="text-xl font-bold text-on-surface mb-2">Batalkan Keputusan?</h3>
+            <p class="text-on-surface-variant text-sm mb-6">Status izin ini akan dikembalikan menjadi <strong>Menunggu</strong>. Anda yakin?</p>
+            
+            <form id="form-batal-izin" method="POST" class="flex justify-center gap-3 w-full">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="status" value="pending">
+                <button type="button" class="flex-1 py-2.5 rounded-lg border border-outline text-on-surface-variant font-bold text-sm hover:bg-surface-container-highest transition-colors" onclick="tutupModalBatal()">Tidak</button>
+                <button type="submit" class="flex-1 py-2.5 rounded-lg bg-[#ba1a1a] text-white font-bold text-sm hover:bg-[#93000a] shadow-sm transition-all">Ya, Batalkan</button>
+            </form>
         </div>
     </div>
 </div>
@@ -188,26 +219,46 @@
         document.getElementById('detail-tanggal').innerText = tanggal;
         document.getElementById('detail-alasan').innerText = alasan || '- Tidak ada alasan tertulis -';
         
-        // Memeriksa Lampiran (Bisa Berupa Gambar)
         const areaLampiran = document.getElementById('area-lampiran');
         if (lampiran && lampiran !== '') {
-            // Asumsi lampiran disimpan di storage/app/public/lampiran (bisa disesuaikan nanti)
             areaLampiran.innerHTML = `<a href="/storage/${lampiran}" target="_blank" class="w-full text-center hover:opacity-80 transition-opacity"><img src="/storage/${lampiran}" alt="Lampiran Izin" class="max-h-64 object-contain mx-auto rounded"><p class="text-xs text-primary mt-2 underline">Klik untuk perbesar</p></a>`;
         } else {
             areaLampiran.innerHTML = `<span class="material-symbols-outlined text-[32px] mb-2">image_not_supported</span><span class="font-bold text-sm">Tidak ada lampiran disertakan</span>`;
         }
         
-        // Menyembunyikan tombol jika status BUKAN pending (sudah diproses)
         const areaTombol = document.getElementById('area-tombol-aksi');
-        if(status.toLowerCase() !== 'pending' && status.toLowerCase() !== 'menunggu') {
-            areaTombol.classList.add('hidden');
-        } else {
+        const areaTerproses = document.getElementById('area-status-terproses');
+        const badgeStatus = document.getElementById('badge-status-saat-ini');
+
+        if(status.toLowerCase() === 'pending' || status.toLowerCase() === 'menunggu') {
             areaTombol.classList.remove('hidden');
-            // Set tujuan Route aksi
+            areaTerproses.classList.add('hidden');
             document.getElementById('form-tolak').action = `/admin/izin/${id}/status`;
             document.getElementById('form-setuju').action = `/admin/izin/${id}/status`;
+        } else {
+            areaTombol.classList.add('hidden');
+            areaTerproses.classList.remove('hidden');
+            document.getElementById('form-batal-izin').action = `/admin/izin/${id}/status`;
+            
+            if (status.toLowerCase() === 'disetujui') {
+                badgeStatus.className = 'px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200';
+                badgeStatus.innerText = 'Telah Disetujui';
+            } else {
+                badgeStatus.className = 'px-3 py-1 rounded-full text-xs font-bold bg-error-container text-on-error-container border border-red-200';
+                badgeStatus.innerText = 'Telah Ditolak';
+            }
         }
 
+        document.getElementById('modal-detail-izin').classList.remove('hidden');
+    }
+
+    function bukaModalBatal() {
+        document.getElementById('modal-detail-izin').classList.add('hidden');
+        document.getElementById('modal-batal-izin').classList.remove('hidden');
+    }
+
+    function tutupModalBatal() {
+        document.getElementById('modal-batal-izin').classList.add('hidden');
         document.getElementById('modal-detail-izin').classList.remove('hidden');
     }
 </script>

@@ -63,11 +63,11 @@
             </button>
         </div>
 
-        <!-- Tombol Export (Dummy) -->
-        <button type="button" class="inline-flex items-center justify-center gap-2 bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary-container hover:shadow-md transition-all active:scale-95 whitespace-nowrap w-full lg:w-auto">
+        <!-- Tombol Export -->
+        <a href="{{ route('admin.absensi.export-pdf', request()->query()) }}" class="inline-flex items-center justify-center gap-2 bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary/90 hover:shadow-md transition-all active:scale-95 whitespace-nowrap w-full lg:w-auto">
             <span class="material-symbols-outlined text-[20px]">download</span>
-            Export Data
-        </button>
+            Export PDF
+        </a>
     </form>
 
     <!-- Table -->
