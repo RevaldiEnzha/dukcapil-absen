@@ -88,7 +88,7 @@
                     <td class="py-4 px-6 text-right">
                         <!-- PERBAIKAN: Kirim ID, alasan, dan lampiran ke JS -->
                         <button type="button" 
-                                onclick="openDetailModal('{{ $izin->id }}', '{{ $izin->pegawai->nama }}', '{{ $izin->jenis_izin }}', '{{ $tanggalDisplay }}', '{{ addslashes($izin->alasan) }}', '{{ $izin->lampiran }}', '{{ $izin->status }}')" 
+                                onclick="openDetailModal('{{ $izin->id }}', '{{ $izin->pegawai->nama }}', '{{ $izin->jenis_izin }}', '{{ $tanggalDisplay }}', '{{ addslashes($izin->alasan) }}', '{{ $izin->lampiran }}', '{{ $izin->status }}', '{{ addslashes($izin->alasan_penolakan ?? '') }}')" 
                                 class="px-4 py-2 border border-primary text-primary font-bold text-xs rounded-lg hover:bg-primary/5 transition-colors">
                             Detail
                         </button>
@@ -144,6 +144,12 @@
                     <div class="p-3 bg-surface-container-low rounded-lg text-on-surface" id="detail-alasan"></div>
                 </div>
 
+                <!-- TAMBAHAN: Box Alasan Penolakan (Disembunyikan secara default) -->
+                <div class="flex flex-col gap-2 border-b border-outline-variant pb-4 hidden" id="box-alasan-tolak-admin">
+                    <div class="font-bold text-[#ba1a1a]">Alasan Penolakan:</div>
+                    <div class="p-3 bg-error-container text-[#ba1a1a] rounded-lg border border-red-200" id="detail-alasan-tolak"></div>
+                </div>
+
                 <!-- Lampiran -->
                 <div class="flex flex-col gap-2">
                     <div class="text-on-surface-variant">Lampiran Surat:</div>
@@ -156,14 +162,10 @@
 
             <!-- Area Tombol Aksi (Hanya muncul jika status Menunggu) -->
             <div class="px-6 py-4 border-t border-outline-variant bg-surface flex justify-end gap-3 hidden" id="area-tombol-aksi">
-                <form id="form-tolak" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="status" value="ditolak">
-                    <button type="submit" class="px-5 py-2 rounded-lg bg-[#ba1a1a] text-white font-bold text-sm hover:bg-[#93000a] shadow-sm transition-all">
-                        Tolak
-                    </button>
-                </form>
+                <!-- PERBAIKAN: Tombol Tolak kini membuka Modal Alasan -->
+                <button type="button" onclick="bukaModalTolak()" class="px-5 py-2 rounded-lg bg-[#ba1a1a] text-white font-bold text-sm hover:bg-[#93000a] shadow-sm transition-all">
+                    Tolak
+                </button>
 
                 <form id="form-setuju" method="POST">
                     @csrf
@@ -212,16 +214,50 @@
     </div>
 </div>
 
+<!-- ================= MODAL KONFIRMASI TOLAK IZIN ================= -->
+<div class="fixed inset-0 z-[110] hidden" id="modal-tolak-izin">
+    <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm transition-opacity" onclick="tutupModalTolak()"></div>
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4 pointer-events-none">
+        <div class="bg-surface-container-lowest rounded-xl w-full max-w-sm shadow-xl pointer-events-auto flex flex-col overflow-hidden p-6">
+            <h3 class="text-xl font-bold text-on-surface mb-2 text-center">Alasan Penolakan</h3>
+            <p class="text-on-surface-variant text-sm mb-4 text-center">Berikan alasan mengapa permohonan izin ini ditolak agar pegawai dapat mengetahuinya.</p>
+            
+            <form id="form-konfirmasi-tolak" method="POST" class="flex flex-col gap-4 w-full">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="status" value="ditolak">
+                
+                <textarea name="alasan_penolakan" rows="3" required class="w-full px-4 py-3 bg-surface border border-outline-variant focus:border-[#ba1a1a] focus:ring-1 focus:ring-[#ba1a1a] rounded-lg outline-none text-sm transition-shadow resize-none" placeholder="Tuliskan alasan penolakan di sini..."></textarea>
+                
+                <div class="flex gap-3 mt-2">
+                    <button type="button" class="flex-1 py-2.5 rounded-lg border border-outline text-on-surface-variant font-bold text-sm hover:bg-surface-container-highest transition-colors" onclick="tutupModalTolak()">Batal</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-lg bg-[#ba1a1a] text-white font-bold text-sm hover:bg-[#93000a] shadow-sm transition-all">Konfirmasi Tolak</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-    function openDetailModal(id, nama, jenis, tanggal, alasan, lampiran, status) {
+    function openDetailModal(id, nama, jenis, tanggal, alasan, lampiran, status, alasanTolak) {
         document.getElementById('detail-nama').innerText = nama;
         document.getElementById('detail-jenis').innerText = jenis;
         document.getElementById('detail-tanggal').innerText = tanggal;
         document.getElementById('detail-alasan').innerText = alasan || '- Tidak ada alasan tertulis -';
         
+        // LOGIKA BARU: Tampilkan alasan tolak jika statusnya Ditolak
+        const boxTolak = document.getElementById('box-alasan-tolak-admin');
+        if (status.toLowerCase() === 'ditolak') {
+            boxTolak.classList.remove('hidden');
+            document.getElementById('detail-alasan-tolak').innerText = alasanTolak || 'Tidak ada keterangan tertulis.';
+        } else {
+            boxTolak.classList.add('hidden');
+        }
+
         const areaLampiran = document.getElementById('area-lampiran');
         if (lampiran && lampiran !== '') {
-            areaLampiran.innerHTML = `<a href="/storage/${lampiran}" target="_blank" class="w-full text-center hover:opacity-80 transition-opacity"><img src="/storage/${lampiran}" alt="Lampiran Izin" class="max-h-64 object-contain mx-auto rounded"><p class="text-xs text-primary mt-2 underline">Klik untuk perbesar</p></a>`;
+            // disimpan di public agar bisa diakses langsung
+            areaLampiran.innerHTML = `<a href="/${lampiran}" target="_blank" class="w-full text-center hover:opacity-80 transition-opacity"><img src="/${lampiran}" alt="Lampiran Izin" class="max-h-64 object-contain mx-auto rounded"><p class="text-xs text-primary mt-2 underline">Klik untuk perbesar</p></a>`;
         } else {
             areaLampiran.innerHTML = `<span class="material-symbols-outlined text-[32px] mb-2">image_not_supported</span><span class="font-bold text-sm">Tidak ada lampiran disertakan</span>`;
         }
@@ -233,8 +269,8 @@
         if(status.toLowerCase() === 'pending' || status.toLowerCase() === 'menunggu') {
             areaTombol.classList.remove('hidden');
             areaTerproses.classList.add('hidden');
-            document.getElementById('form-tolak').action = `/admin/izin/${id}/status`;
             document.getElementById('form-setuju').action = `/admin/izin/${id}/status`;
+            document.getElementById('form-konfirmasi-tolak').action = `/admin/izin/${id}/status`;
         } else {
             areaTombol.classList.add('hidden');
             areaTerproses.classList.remove('hidden');
@@ -259,6 +295,16 @@
 
     function tutupModalBatal() {
         document.getElementById('modal-batal-izin').classList.add('hidden');
+        document.getElementById('modal-detail-izin').classList.remove('hidden');
+    }
+
+    function bukaModalTolak() {
+        document.getElementById('modal-detail-izin').classList.add('hidden');
+        document.getElementById('modal-tolak-izin').classList.remove('hidden');
+    }
+
+    function tutupModalTolak() {
+        document.getElementById('modal-tolak-izin').classList.add('hidden');
         document.getElementById('modal-detail-izin').classList.remove('hidden');
     }
 </script>

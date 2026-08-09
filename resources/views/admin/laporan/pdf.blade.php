@@ -101,5 +101,25 @@
         Dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d M Y H:i:s') }}
     </div>
 
+    <!-- ================= BLOK TANDA TANGAN ================= -->
+    <table border="0" cellspacing="0" cellpadding="0" style="width: 100%; margin-top: 40px; page-break-inside: avoid; border: none; border-collapse: collapse;">
+        <tr style="border: none;">
+            <!-- Kolom kosong di kiri (60%) agar tanda tangan terdorong ke kanan -->
+            <td style="width: 60%; border: none;"></td>
+            
+            <!-- Kolom tanda tangan di kanan (40%) -->
+            <td style="width: 40%; text-align: center; font-size: 11px; line-height: 1.4; border: none;">
+                <p style="margin: 0; padding-bottom: 5px;">Cirebon, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
+                <p style="margin: 0; font-weight: bold;">Kepala Sub Bagian Umum dan Kepegawaian,</p>
+                
+                <!-- Jarak kosong vertikal untuk coretan tanda tangan asli / stempel basah -->
+                <div style="height: 70px;"></div>
+                
+                <p style="margin: 0; font-weight: bold; text-decoration: underline;">Sri Cartini, S.Kom</p>
+                <p style="margin: 0;">NIP. 198405222009022002</p>
+            </td>
+        </tr>
+    </table>
+
 </body>
 </html>

@@ -46,7 +46,7 @@
             <div class="relative">
                 <select name="tahun" class="w-full px-4 py-2.5 rounded-lg border border-outline-variant bg-surface text-on-surface text-sm focus:ring-1 focus:ring-primary focus:border-primary appearance-none cursor-pointer outline-none transition-shadow">
                     @php $tahunSekarang = date('Y'); @endphp
-                    @for($i = $tahunSekarang; $i >= $tahunSekarang - 3; $i--)
+                    @for($i = $tahunSekarang; $i >= 2026; $i--)
                         <option value="{{ $i }}" {{ $tahun == $i ? 'selected' : '' }}>{{ $i }}</option>
                     @endfor
                 </select>
@@ -119,7 +119,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="py-8 text-center text-on-surface-variant">Tidak ada data pegawai.</td>
+                    <td colspan="7" class="py-8 text-center text-on-surface-variant">Tidak ada data pegawai pada bulan dan tahun tersebut.</td>
                 </tr>
                 @endforelse
                 
