@@ -14,26 +14,54 @@ class DatabaseSeeder extends Seeder
         // 1. Membuat Akun Admin
         User::create([
             'username' => 'admin',
-            'password' => Hash::make('admin123'), // Hash::make wajib untuk mengenkripsi password
+            'password' => Hash::make('admin123'), 
             'role'     => 'admin',
         ]);
 
-        // 2. Membuat Akun Pegawai
-        $userPegawai = User::create([
-            'username' => 'pegawai1',
-            'password' => Hash::make('pegawai123'),
-            'role'     => 'pegawai',
-        ]);
+        // 2. Daftar Pegawai Baru Sesuai Permintaan
+        $daftarPegawai = [
+            [
+                'nik'           => '3209142808010005',
+                'nama'          => 'Muhamad Shadam Azriel',
+                'jenis_kelamin' => 'L',
+                'alamat'        => 'DUSUN II BLOK KAVLING GG. SALAM 7',
+                'no_hp'         => null,
+            ],
+            [
+                'nik'           => '3209200205960010',
+                'nama'          => 'Dany Ryanto',
+                'jenis_kelamin' => 'L',
+                'alamat'        => 'JL. SETIA NO.49',
+                'no_hp'         => null,
+            ],
+            [
+                'nik'           => '3274036305030005',
+                'nama'          => 'Risya Nazhira Rahma',
+                'jenis_kelamin' => 'P',
+                'alamat'        => null,
+                'no_hp'         => '0895334827810',
+            ]
+        ];
 
-        // 3. Membuat Profil Biodata Pegawai yang terhubung ke Akun Pegawai
-        Pegawai::create([
-            'user_id'       => $userPegawai->id, // Mengambil ID dari akun pegawai yang baru dibuat di atas
-            'nik'           => '3274012345678901',
-            'nama'          => 'Budi Santoso',
-            'jenis_kelamin' => 'Laki-laki',
-            'no_hp'         => '081234567890',
-            'alamat'        => 'Jl. Siliwangi, Kota Cirebon',
-            'status'        => 'aktif',
-        ]);
+        // 3. Looping untuk mengeksekusi pembuatan User dan Biodatanya
+        foreach ($daftarPegawai as $data) {
+            // Buat akun login untuk pegawai
+            $userPegawai = User::create([
+                'username' => $data['nik'], 
+                'password' => Hash::make('123456'), // Semua password diset 123456
+                'role'     => 'pegawai',
+            ]);
+
+            // Buat profil data pegawai dan hubungkan dengan akun login
+            Pegawai::create([
+                'user_id'       => $userPegawai->id, 
+                'nik'           => $data['nik'],
+                'nama'          => $data['nama'],
+                'jenis_kelamin' => $data['jenis_kelamin'], 
+                'no_hp'         => $data['no_hp'],
+                'alamat'        => $data['alamat'],
+                'status'        => 'Aktif',
+            ]);
+        }
     }
 }

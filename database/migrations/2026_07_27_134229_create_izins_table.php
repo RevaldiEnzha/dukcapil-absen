@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('alasan');
             $table->string('lampiran')->nullable();
             $table->string('status')->default('pending'); // pending, disetujui, ditolak
+            $table->text('alasan_penolakan')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();

@@ -14,7 +14,10 @@ return new class extends Migration
             $table->date('tanggal');
             $table->time('check_in')->nullable();
             $table->time('check_out')->nullable();
-            $table->string('status'); // Tepat Waktu, Terlambat, Pulang Cepat
+            
+            // PERBAIKAN: Beri nilai default agar aman saat data awal dibuat
+            $table->string('status')->default('Belum Absen'); 
+            
             $table->timestamps();
         });
     }

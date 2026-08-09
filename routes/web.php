@@ -2,30 +2,76 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\PegawaiController; // <--- INI BARIS YANG HILANG
 
-// Rute Autentikasi
+// --- CONTROLLER ADMIN ---
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PegawaiController; 
+use App\Http\Controllers\Admin\AbsensiController;
+use App\Http\Controllers\Admin\IzinController;
+use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\HariLiburController;
+
+// --- CONTROLLER PEGAWAI (USER) ---
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\User\AbsenController as UserAbsenController;
+use App\Http\Controllers\User\IzinController as UserIzinController;
+use App\Http\Controllers\User\ProfilController as UserProfilController;
+
+// RUTE AUTENTIKASI UTAMA
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Rute yang Dilindungi Auth
+// RUTE YANG DILINDUNGI (HARUS LOGIN)
 Route::middleware('auth')->group(function () {
-    
-    // -- RUTE ADMIN --
-    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
-    
-    // Rute Manajemen Pegawai
-    Route::get('/admin/pegawai', [PegawaiController::class, 'index'])->name('admin.pegawai.index');
-    Route::post('/admin/pegawai', [PegawaiController::class, 'store'])->name('admin.pegawai.store');
-    Route::get('/admin/pegawai/{id}/edit', [PegawaiController::class, 'edit'])->name('admin.pegawai.edit');
-    Route::put('/admin/pegawai/{id}', [PegawaiController::class, 'update'])->name('admin.pegawai.update');
-    Route::delete('/admin/pegawai/{id}', [PegawaiController::class, 'destroy'])->name('admin.pegawai.destroy');
+    // 1. ADMIN
+    Route::prefix('admin')->name('admin.')->group(function () {
+        
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
+        // Manajemen Pegawai
+        Route::get('/pegawai', [PegawaiController::class, 'index'])->name('pegawai.index');
+        Route::post('/pegawai', [PegawaiController::class, 'store'])->name('pegawai.store');
+        Route::get('/pegawai/{id}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
+        Route::put('/pegawai/{id}', [PegawaiController::class, 'update'])->name('pegawai.update');
+        Route::delete('/pegawai/{id}', [PegawaiController::class, 'destroy'])->name('pegawai.destroy');
+        
+        // Manajemen Absensi
+        Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
+        Route::get('/absensi/export-pdf', [AbsensiController::class, 'exportPdf'])->name('absensi.export-pdf');
+        
+        // Manajemen Izin
+        Route::get('/izin', [IzinController::class, 'index'])->name('izin.index');
+        Route::put('/izin/{id}/status', [IzinController::class, 'updateStatus'])->name('izin.update-status');
+        
+        // Manajemen Laporan
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.export-pdf');
+        
+        // Manajemen Hari Libur
+        Route::get('/hari-libur', [HariLiburController::class, 'index'])->name('hari-libur.index');
+        Route::post('/hari-libur', [HariLiburController::class, 'store'])->name('hari-libur.store');
+        Route::delete('/hari-libur/{id}', [HariLiburController::class, 'destroy'])->name('hari-libur.destroy');
+    });
 
-    // -- RUTE PEGAWAI --
-    Route::get('/pegawai/dashboard', function () {
-        return 'Ini Halaman Dashboard Pegawai';
-    })->name('pegawai.dashboard');
+    // 2. PEGAWAI (USER)
+    Route::prefix('user')->name('pegawai.')->group(function () {
+        
+        Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+        
+        // Absensi (Scanner)
+        Route::get('/absen', [UserAbsenController::class, 'index'])->name('absen');
+        Route::post('/absen/scan', [UserAbsenController::class, 'processScan'])->name('absen.scan'); 
+        
+        // Pengajuan Izin
+        Route::get('/izin', [UserIzinController::class, 'index'])->name('izin');
+        Route::post('/izin', [UserIzinController::class, 'store'])->name('izin.store');
+        Route::delete('/izin/{id}', [UserIzinController::class, 'destroy'])->name('izin.destroy');
+        
+        // Profil & Riwayat
+        Route::get('/profil', [UserProfilController::class, 'index'])->name('profil');
+        Route::put('/profil/update', [UserProfilController::class, 'updateAkun'])->name('profil.update'); 
+        Route::get('/riwayat-absensi', [UserProfilController::class, 'riwayat'])->name('riwayat');
+    });
 
 });
